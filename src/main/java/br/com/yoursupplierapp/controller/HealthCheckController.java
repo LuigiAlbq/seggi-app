@@ -17,7 +17,7 @@ public class HealthCheckController {
             @ApiResponse(description = "Request has been forwarded", responseCode = "200", content = @Content(mediaType = "application/json")),
             @ApiResponse(description = "There was an error forwarding the request", responseCode = "500")})
     public ResponseEntity<String> HealthCheck() {
-        return new ResponseEntity<>("I'm alive - Api Bridge!", HttpStatus.OK);
+        return new ResponseEntity<>("I'm alive - Seggi App!", HttpStatus.OK);
     }
 
 }

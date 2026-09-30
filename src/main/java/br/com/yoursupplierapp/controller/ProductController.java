@@ -1,80 +1,66 @@
 package br.com.yoursupplierapp.controller;
 
-import br.com.yoursupplierapp.dto.ProductDTO;
-import br.com.yoursupplierapp.entity.ProductEntity;
+import br.com.yoursupplierapp.api.ProductApi;
+import br.com.yoursupplierapp.api.model.ProductRequest;
+import br.com.yoursupplierapp.api.model.ProductResponse;
 import br.com.yoursupplierapp.exception.BusinessException;
-import br.com.yoursupplierapp.repository.ProductRepository;
 import br.com.yoursupplierapp.service.ProductService;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/product")
-public class ProductController {
+public class ProductController implements ProductApi {
 
     private final ProductService productService;
 
-    private final ProductRepository productRepository;
-
-    public ProductController(ProductService productService, ProductRepository productRepository) {
+    public ProductController(ProductService productService) {
         this.productService = productService;
-        this.productRepository = productRepository;
     }
 
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<String> save(
-            @RequestBody ProductDTO productDTO) {
+    @Override
+    public ResponseEntity<String> createProduct(ProductRequest productRequest) {
         try {
-            productService.createProducts(productDTO);
-            return ResponseEntity.ok("Product created with success");
+            productService.createProducts(productRequest);
+            return ResponseEntity.status(HttpStatus.CREATED).body("Product created with success");
         } catch (BusinessException e) {
             return ResponseEntity.badRequest().body("Error creating product: " + e.getMessage());
         }
     }
 
-    @GetMapping
-    public ResponseEntity<List<ProductEntity>> list() {
-        Pageable pageable = PageRequest.of(2, 25); // Returns only the first page with 1000 results
-
-        Page<ProductEntity> productPage = productRepository.findAll(pageable);
-        List<ProductEntity> products = productPage.getContent();
-
-        return ResponseEntity.ok(products);
+    @Override
+    public ResponseEntity<List<ProductResponse>> listProducts() {
+        return ResponseEntity.ok(productService.listProducts());
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<?> findById(@PathVariable Long id) {
+    @Override
+    public ResponseEntity<ProductResponse> getProductById(Long id) {
         try {
-            return productService.findProductById(id);
-            //return ResponseEntity.ok(clientService.findUserById(id));  -> Apresenta headers, boddy, status code..
+            return ResponseEntity.ok(productService.findProductById(id));
         } catch (BusinessException e) {
-            return ResponseEntity.badRequest().body("Error finding product: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
 
-    @PutMapping("/{id}")
-    @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<String> update(
-            @RequestBody ProductDTO productDTO,
-            @PathVariable("id") Long id) {
-        return productService.updateProductById(productDTO, id);
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteById(
-            @PathVariable("id") Long id) {
+    @Override
+    public ResponseEntity<String> updateProductById(Long id, ProductRequest productRequest) {
         try {
-            return productService.deleteById(id);
+            productService.updateProductById(id, productRequest);
+            return ResponseEntity.ok("Product updated successfully");
         } catch (BusinessException e) {
-            return ResponseEntity.badRequest().body("Error deleting client: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Error updating product: " + e.getMessage());
         }
     }
 
+    @Override
+    public ResponseEntity<String> deleteProductById(Long id) {
+        try {
+            productService.deleteById(id);
+            return ResponseEntity.ok("Product removed successfully");
+        } catch (BusinessException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Error deleting product: " + e.getMessage());
+        }
+    }
 }

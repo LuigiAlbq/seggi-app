@@ -1,23 +1,19 @@
 package br.com.yoursupplierapp.service;
 
-import br.com.yoursupplierapp.dto.PaymentDTO;
-import br.com.yoursupplierapp.dto.UserDTO;
-import br.com.yoursupplierapp.entity.PaymentEntity;
-import br.com.yoursupplierapp.exception.BusinessException;
-import br.com.yoursupplierapp.repository.PaymentRepository;
-import org.springframework.http.ResponseEntity;
+import br.com.yoursupplierapp.api.model.PaymentRequest;
+import br.com.yoursupplierapp.api.model.PaymentResponse;
+
+import java.util.List;
 
 public interface PaymentService {
 
-    ResponseEntity<PaymentEntity> findPaymentById(Long idPayment);
+    void createPayment(PaymentRequest paymentRequest);
 
-    void createPayment(PaymentDTO paymentDTO);
+    List<PaymentResponse> listPayments();
 
-    void isExistentPayment(PaymentRepository paymentRepository, PaymentDTO paymentDTO) throws BusinessException;
+    PaymentResponse findPaymentById(Long idPayment);
 
-    ResponseEntity<String> updatePayment(PaymentDTO paymentDTO, Long id);
+    void updatePayment(Long id, PaymentRequest paymentRequest);
 
-    ResponseEntity<String> deleteById(Long id);
-
-
+    void deleteById(Long id);
 }

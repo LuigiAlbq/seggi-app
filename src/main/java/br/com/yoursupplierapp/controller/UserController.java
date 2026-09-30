@@ -1,74 +1,66 @@
 package br.com.yoursupplierapp.controller;
 
-import br.com.yoursupplierapp.dto.UserDTO;
-import br.com.yoursupplierapp.entity.UserEntity;
+import br.com.yoursupplierapp.api.UserApi;
+import br.com.yoursupplierapp.api.model.UserRequest;
+import br.com.yoursupplierapp.api.model.UserResponse;
 import br.com.yoursupplierapp.exception.BusinessException;
-import br.com.yoursupplierapp.repository.UserRepository;
 import br.com.yoursupplierapp.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/user")
-public class UserController {
+public class UserController implements UserApi {
 
     private final UserService userService;
 
-    private final UserRepository userRepository;
-
-    public UserController(UserService userService, UserRepository userRepository) {
+    public UserController(UserService userService) {
         this.userService = userService;
-        this.userRepository = userRepository;
     }
 
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<String> save(
-            @RequestBody UserDTO userDTO) {
+    @Override
+    public ResponseEntity<String> createUser(UserRequest userRequest) {
         try {
-            userService.createUser(userDTO);
-            return ResponseEntity.ok("User created with success");
+            userService.createUser(userRequest);
+            return ResponseEntity.status(HttpStatus.CREATED).body("User created with success");
         } catch (BusinessException e) {
             return ResponseEntity.badRequest().body("Error creating user: " + e.getMessage());
         }
     }
 
-    @GetMapping
-    public ResponseEntity<List<UserEntity>> list() {
-        List<UserEntity> user = userRepository.findAll();
-        return ResponseEntity.ok(user);
+    @Override
+    public ResponseEntity<List<UserResponse>> listUsers() {
+        return ResponseEntity.ok(userService.listUsers());
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<?> findById(
-            @PathVariable Long id) {
+    @Override
+    public ResponseEntity<UserResponse> getUserById(Long id) {
         try {
-            return userService.findUserById(id);
-            //return ResponseEntity.ok(clientService.findUserById(id)); -> Displays headers, body, status code...
+            return ResponseEntity.ok(userService.findUserById(id));
         } catch (BusinessException e) {
-            return ResponseEntity.badRequest().body("Error finding client: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
 
-    @PutMapping("/{id}")
-    @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<String> update(
-            @RequestBody UserDTO userDTO,
-            @PathVariable("id") Long id) {
-        return userService.updateUserById(userDTO, id);
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteById(
-            @PathVariable("id") Long id) {
+    @Override
+    public ResponseEntity<String> updateUserById(Long id, UserRequest userRequest) {
         try {
-            return userService.deleteById(id);
+            userService.updateUserById(id, userRequest);
+            return ResponseEntity.ok("User updated successfully");
         } catch (BusinessException e) {
-            return ResponseEntity.badRequest().body("Error deleting client: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Error updating user: " + e.getMessage());
         }
     }
 
+    @Override
+    public ResponseEntity<String> deleteUserById(Long id) {
+        try {
+            userService.deleteById(id);
+            return ResponseEntity.ok("User deleted successfully");
+        } catch (BusinessException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Error deleting user: " + e.getMessage());
+        }
+    }
 }

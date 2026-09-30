@@ -1,73 +1,66 @@
 package br.com.yoursupplierapp.controller;
 
-import br.com.yoursupplierapp.dto.UserDTO;
-import br.com.yoursupplierapp.dto.WarehouseDTO;
-import br.com.yoursupplierapp.entity.ProductEntity;
-import br.com.yoursupplierapp.entity.WarehouseEntity;
+import br.com.yoursupplierapp.api.WarehouseApi;
+import br.com.yoursupplierapp.api.model.WarehouseRequest;
+import br.com.yoursupplierapp.api.model.WarehouseResponse;
 import br.com.yoursupplierapp.exception.BusinessException;
-import br.com.yoursupplierapp.repository.WareHouseRepository;
 import br.com.yoursupplierapp.service.WareHouseService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/warehouse")
-public class WareHouseController {
+public class WareHouseController implements WarehouseApi {
 
     private final WareHouseService wareHouseService;
 
-    private final WareHouseRepository wareHouseRepository;
-
-    public WareHouseController(WareHouseService wareHouseService, WareHouseRepository wareHouseRepository) {
+    public WareHouseController(WareHouseService wareHouseService) {
         this.wareHouseService = wareHouseService;
-        this.wareHouseRepository = wareHouseRepository;
     }
 
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<String> save(@RequestBody WarehouseDTO warehouseDTO) {
+    @Override
+    public ResponseEntity<String> createWarehouse(WarehouseRequest warehouseRequest) {
         try {
-            wareHouseService.createWareHouse(warehouseDTO);
-            return ResponseEntity.ok("Warehouse created successfully");
+            wareHouseService.createWareHouse(warehouseRequest);
+            return ResponseEntity.status(HttpStatus.CREATED).body("Warehouse created successfully");
         } catch (BusinessException e) {
             return ResponseEntity.badRequest().body("Error creating warehouse: " + e.getMessage());
         }
     }
 
-    @PutMapping("/{id}")
-    @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<String> update(
-            @RequestBody WarehouseDTO warehouseDTO,
-            @PathVariable("id") Long id) {
-        return wareHouseService.updateWarehouseById(warehouseDTO, id);
+    @Override
+    public ResponseEntity<List<WarehouseResponse>> listWarehouses() {
+        return ResponseEntity.ok(wareHouseService.listWarehouses());
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<?> findById(@PathVariable Long id) {
+    @Override
+    public ResponseEntity<WarehouseResponse> getWarehouseById(Long id) {
         try {
-            return wareHouseService.findWarehouseById(id);
+            return ResponseEntity.ok(wareHouseService.findWarehouseById(id));
         } catch (BusinessException e) {
-            return ResponseEntity.badRequest().body("Error finding warehouse: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
 
-    @GetMapping
-    public ResponseEntity<List<WarehouseEntity>> list() {
-        List<WarehouseEntity> clients = wareHouseRepository.findAll();
-        return ResponseEntity.ok(clients);
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteById(
-            @PathVariable("id") Long id) {
+    @Override
+    public ResponseEntity<String> updateWarehouseById(Long id, WarehouseRequest warehouseRequest) {
         try {
-                return wareHouseService.deleteById(id);
+            wareHouseService.updateWarehouseById(id, warehouseRequest);
+            return ResponseEntity.ok("Warehouse updated successfully");
         } catch (BusinessException e) {
-            return ResponseEntity.badRequest().body("Error deleting client: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Error updating warehouse: " + e.getMessage());
         }
     }
 
+    @Override
+    public ResponseEntity<String> deleteWarehouseById(Long id) {
+        try {
+            wareHouseService.deleteById(id);
+            return ResponseEntity.ok("Warehouse removed successfully");
+        } catch (BusinessException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Error deleting warehouse: " + e.getMessage());
+        }
+    }
 }

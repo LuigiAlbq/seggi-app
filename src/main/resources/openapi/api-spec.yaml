@@ -1,0 +1,799 @@
+openapi: 3.0.3
+info:
+  title: Seggi App API
+  description: Microservice API for inventory control and product distribution (Seggi).
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+    description: Local Environment
+
+tags:
+  - name: User
+    description: Operations related to users
+  - name: Role
+    description: Operations related to roles
+  - name: Group
+    description: Operations related to user groups
+  - name: Product
+    description: Operations related to products
+  - name: Warehouse
+    description: Operations related to warehouses
+  - name: Payment
+    description: Operations related to payments
+
+paths:
+  /api/user:
+    post:
+      tags:
+        - User
+      summary: Create a new user
+      operationId: createUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRequest'
+      responses:
+        '201':
+          description: User created successfully
+          content:
+            text/plain:
+              schema:
+                type: string
+        '400':
+          description: Validation error or business exception
+    get:
+      tags:
+        - User
+      summary: List all users
+      operationId: listUsers
+      responses:
+        '200':
+          description: List of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserResponse'
+
+  /api/user/{id}:
+    get:
+      tags:
+        - User
+      summary: Find user by ID
+      operationId: getUserById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: User found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '404':
+          description: User not found
+    put:
+      tags:
+        - User
+      summary: Update user by ID
+      operationId: updateUserById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRequest'
+      responses:
+        '200':
+          description: User updated successfully
+          content:
+            text/plain:
+              schema:
+                type: string
+        '404':
+          description: User not found
+    delete:
+      tags:
+        - User
+      summary: Delete user by ID
+      operationId: deleteUserById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: User deleted successfully
+          content:
+            text/plain:
+              schema:
+                type: string
+        '404':
+          description: User not found
+
+  /api/role:
+    post:
+      tags:
+        - Role
+      summary: Create a new role
+      operationId: createRole
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoleRequest'
+      responses:
+        '201':
+          description: Role created successfully
+    get:
+      tags:
+        - Role
+      summary: List all roles
+      operationId: listRoles
+      responses:
+        '200':
+          description: List of roles
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RoleResponse'
+
+  /api/group:
+    post:
+      tags:
+        - Group
+      summary: Create a new group
+      operationId: createGroup
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GroupRequest'
+      responses:
+        '201':
+          description: Group created successfully
+
+  /api/role/{id}:
+    get:
+      tags:
+        - Role
+      summary: Find role by ID
+      operationId: getRoleById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Role found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoleResponse'
+        '404':
+          description: Role not found
+    put:
+      tags:
+        - Role
+      summary: Update role by ID
+      operationId: updateRoleById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoleRequest'
+      responses:
+        '200':
+          description: Role updated successfully
+          content:
+            text/plain:
+              schema:
+                type: string
+        '404':
+          description: Role not found
+    delete:
+      tags:
+        - Role
+      summary: Delete role by ID
+      operationId: deleteRoleById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Role deleted successfully
+          content:
+            text/plain:
+              schema:
+                type: string
+        '404':
+          description: Role not found
+
+  /api/product:
+    post:
+      tags:
+        - Product
+      summary: Create a new product
+      operationId: createProduct
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductRequest'
+      responses:
+        '201':
+          description: Product created successfully
+          content:
+            text/plain:
+              schema:
+                type: string
+        '400':
+          description: Validation error or business exception
+    get:
+      tags:
+        - Product
+      summary: List all products
+      operationId: listProducts
+      responses:
+        '200':
+          description: List of products
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProductResponse'
+
+  /api/product/{id}:
+    get:
+      tags:
+        - Product
+      summary: Find product by ID
+      operationId: getProductById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Product found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductResponse'
+        '404':
+          description: Product not found
+    put:
+      tags:
+        - Product
+      summary: Update product by ID
+      operationId: updateProductById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductRequest'
+      responses:
+        '200':
+          description: Product updated successfully
+          content:
+            text/plain:
+              schema:
+                type: string
+        '404':
+          description: Product not found
+    delete:
+      tags:
+        - Product
+      summary: Delete product by ID
+      operationId: deleteProductById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Product deleted successfully
+          content:
+            text/plain:
+              schema:
+                type: string
+        '404':
+          description: Product not found
+
+  /api/warehouse:
+    post:
+      tags:
+        - Warehouse
+      summary: Create a new warehouse
+      operationId: createWarehouse
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WarehouseRequest'
+      responses:
+        '201':
+          description: Warehouse created successfully
+          content:
+            text/plain:
+              schema:
+                type: string
+        '400':
+          description: Validation error or business exception
+    get:
+      tags:
+        - Warehouse
+      summary: List all warehouses
+      operationId: listWarehouses
+      responses:
+        '200':
+          description: List of warehouses
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WarehouseResponse'
+
+  /api/warehouse/{id}:
+    get:
+      tags:
+        - Warehouse
+      summary: Find warehouse by ID
+      operationId: getWarehouseById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Warehouse found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WarehouseResponse'
+        '404':
+          description: Warehouse not found
+    put:
+      tags:
+        - Warehouse
+      summary: Update warehouse by ID
+      operationId: updateWarehouseById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WarehouseRequest'
+      responses:
+        '200':
+          description: Warehouse updated successfully
+          content:
+            text/plain:
+              schema:
+                type: string
+        '404':
+          description: Warehouse not found
+    delete:
+      tags:
+        - Warehouse
+      summary: Delete warehouse by ID
+      operationId: deleteWarehouseById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Warehouse deleted successfully
+          content:
+            text/plain:
+              schema:
+                type: string
+        '404':
+          description: Warehouse not found
+
+  /api/payment:
+    post:
+      tags:
+        - Payment
+      summary: Create a new payment
+      operationId: createPayment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentRequest'
+      responses:
+        '201':
+          description: Payment created successfully
+          content:
+            text/plain:
+              schema:
+                type: string
+        '400':
+          description: Validation error or business exception
+    get:
+      tags:
+        - Payment
+      summary: List all payments
+      operationId: listPayments
+      responses:
+        '200':
+          description: List of payments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PaymentResponse'
+
+  /api/payment/{id}:
+    get:
+      tags:
+        - Payment
+      summary: Find payment by ID
+      operationId: getPaymentById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Payment found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentResponse'
+        '404':
+          description: Payment not found
+    put:
+      tags:
+        - Payment
+      summary: Update payment by ID
+      operationId: updatePaymentById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentRequest'
+      responses:
+        '200':
+          description: Payment updated successfully
+          content:
+            text/plain:
+              schema:
+                type: string
+        '404':
+          description: Payment not found
+    delete:
+      tags:
+        - Payment
+      summary: Delete payment by ID
+      operationId: deletePaymentById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Payment deleted successfully
+          content:
+            text/plain:
+              schema:
+                type: string
+        '404':
+          description: Payment not found
+
+components:
+  schemas:
+    CardStatus:
+      type: string
+      enum:
+        - ACTIVE
+        - DISABLED
+
+    PaymentType:
+      type: string
+      enum:
+        - BOLETO
+        - CREDITO
+        - DEBITO
+        - PIX
+
+    UserRequest:
+      type: object
+      required:
+        - userName
+        - email
+        - password
+      properties:
+        userName:
+          type: string
+          example: "john.doe"
+        email:
+          type: string
+          format: email
+          example: "john@example.com"
+        password:
+          type: string
+          format: password
+          example: "Secret123"
+        cardStatus:
+          $ref: '#/components/schemas/CardStatus'
+        groupIds:
+          type: array
+          items:
+            type: integer
+            format: int64
+
+    UserResponse:
+      type: object
+      properties:
+        idUser:
+          type: integer
+          format: int64
+          example: 1
+        userName:
+          type: string
+          example: "john.doe"
+        email:
+          type: string
+          example: "john@example.com"
+        cardStatus:
+          $ref: '#/components/schemas/CardStatus'
+
+    RoleRequest:
+      type: object
+      required:
+        - roleName
+      properties:
+        roleName:
+          type: string
+          example: "ADMIN"
+
+    RoleResponse:
+      type: object
+      properties:
+        idRole:
+          type: integer
+          format: int64
+          example: 1
+        roleName:
+          type: string
+          example: "ADMIN"
+
+    GroupRequest:
+      type: object
+      required:
+        - groupName
+      properties:
+        groupName:
+          type: string
+          example: "Logistics Team"
+        userIds:
+          type: array
+          items:
+            type: integer
+            format: int64
+        roleIds:
+          type: array
+          items:
+            type: integer
+            format: int64
+
+    ProductRequest:
+      type: object
+      required:
+        - name
+        - price
+      properties:
+        name:
+          type: string
+          example: "Item A"
+        price:
+          type: number
+          format: double
+          example: 49.90
+        weight:
+          type: number
+          format: double
+          example: 1.5
+        warehouseId:
+          type: integer
+          format: int64
+        orderId:
+          type: integer
+          format: int64
+
+    WarehouseRequest:
+      type: object
+      required:
+        - name
+        - capacity
+      properties:
+        name:
+          type: string
+          example: "Central Warehouse"
+        address:
+          type: string
+          example: "Av. Paulista, 1000"
+        capacity:
+          type: integer
+          example: 5000
+
+    PaymentRequest:
+      type: object
+      required:
+        - paymentConstant
+        - paymentValue
+      properties:
+        paymentConstant:
+          $ref: '#/components/schemas/PaymentType'
+        numCard:
+          type: string
+          example: "1234567812345678"
+        cvv:
+          type: string
+          example: "123"
+        expirationDate:
+          type: string
+          example: "12/28"
+        paymentValue:
+          type: number
+          format: double
+          example: 199.90
+        orderId:
+          type: integer
+          format: int64
+
+    ProductResponse:
+      type: object
+      properties:
+        idProduct:
+          type: integer
+          format: int64
+          example: 1
+        name:
+          type: string
+          example: "Item A"
+        price:
+          type: number
+          format: double
+          example: 49.90
+        weight:
+          type: number
+          format: double
+          example: 1.5
+        warehouseId:
+          type: integer
+          format: int64
+        orderId:
+          type: integer
+          format: int64
+
+    WarehouseResponse:
+      type: object
+      properties:
+        idWarehouse:
+          type: integer
+          format: int64
+          example: 1
+        name:
+          type: string
+          example: "Central Warehouse"
+        address:
+          type: string
+          example: "Av. Paulista, 1000"
+        capacity:
+          type: integer
+          example: 5000
+
+    PaymentResponse:
+      type: object
+      properties:
+        idPayment:
+          type: integer
+          format: int64
+          example: 1
+        paymentConstant:
+          $ref: '#/components/schemas/PaymentType'
+        numCard:
+          type: string
+          example: "1234567812345678"
+        cvv:
+          type: string
+          example: "123"
+        expirationDate:
+          type: string
+          example: "12/28"
+        paymentValue:
+          type: number
+          format: double
+          example: 199.90
+        orderId:
+          type: integer
+          format: int64
+
