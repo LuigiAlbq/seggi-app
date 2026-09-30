@@ -1,22 +1,19 @@
 package br.com.yoursupplierapp.service;
 
-import br.com.yoursupplierapp.dto.RoleDTO;
-import br.com.yoursupplierapp.entity.RoleEntity;
-import br.com.yoursupplierapp.exception.BusinessException;
-import br.com.yoursupplierapp.repository.RoleRepository;
-import org.springframework.http.ResponseEntity;
+import br.com.yoursupplierapp.api.model.RoleRequest;
+import br.com.yoursupplierapp.api.model.RoleResponse;
 
-import java.math.BigDecimal;
+import java.util.List;
 
 public interface RoleService {
 
-    void createRole(RoleDTO roleDTO);
+    void createRole(RoleRequest roleRequest);
 
-    void isExistentRole(RoleRepository roleRepository, RoleDTO roleDTO) throws BusinessException;
+    List<RoleResponse> listRoles();
 
-    ResponseEntity<RoleEntity> findRoleById(Long id);
+    RoleResponse findRoleById(Long id);
 
-    ResponseEntity<String> updateRoleById(RoleDTO roleDTO, Long id);
-    ResponseEntity<String>  deleteById(Long id);
+    void updateRoleById(Long id, RoleRequest roleRequest);
 
+    void deleteById(Long id);
 }

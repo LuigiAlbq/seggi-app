@@ -1,83 +1,74 @@
 package br.com.yoursupplierapp.service.impl;
 
-import br.com.yoursupplierapp.dto.UserDTO;
-import br.com.yoursupplierapp.dto.WarehouseDTO;
-import br.com.yoursupplierapp.entity.UserEntity;
+import br.com.yoursupplierapp.api.model.WarehouseRequest;
+import br.com.yoursupplierapp.api.model.WarehouseResponse;
 import br.com.yoursupplierapp.entity.WarehouseEntity;
 import br.com.yoursupplierapp.exception.BusinessException;
+import br.com.yoursupplierapp.mapper.WarehouseMapper;
 import br.com.yoursupplierapp.repository.WareHouseRepository;
 import br.com.yoursupplierapp.service.WareHouseService;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.util.StringUtils;
 
-import java.util.Optional;
+import java.util.List;
 
 @Service
 public class WareHouseServiceImpl implements WareHouseService {
 
     private final WareHouseRepository wareHouseRepository;
+    private final WarehouseMapper warehouseMapper;
 
-    public WareHouseServiceImpl(WareHouseRepository wareHouseRepository) {
+    public WareHouseServiceImpl(WareHouseRepository wareHouseRepository, WarehouseMapper warehouseMapper) {
         this.wareHouseRepository = wareHouseRepository;
+        this.warehouseMapper = warehouseMapper;
     }
 
     @Override
-    public void createWareHouse(WarehouseDTO warehouseDTO) {
+    public void createWareHouse(WarehouseRequest warehouseRequest) {
         try {
-            WarehouseEntity warehouseEntity = new WarehouseEntity();
-            warehouseEntity.setName(warehouseDTO.getName());
-            warehouseEntity.setAddress(warehouseDTO.getAddress());
-            warehouseEntity.setCapacity(warehouseDTO.getCapacity());
+            WarehouseEntity warehouseEntity = warehouseMapper.toEntity(warehouseRequest);
             wareHouseRepository.save(warehouseEntity);
         } catch (DataIntegrityViolationException e) {
-            throw new BusinessException("Cannot create warehouse");
-        }
-    }
-
-    public ResponseEntity<String> updateWarehouseById(WarehouseDTO warehouseDTO, Long id) {
-        try {
-            WarehouseEntity warehouseEntity = wareHouseRepository.findById(id)
-                    .orElseThrow(() -> new BusinessException("User id number: " + id + " not found in system!"));
-
-            // Update customer fields based on dto data
-            warehouseEntity.setName(warehouseDTO.getName());
-            warehouseEntity.setCapacity(warehouseDTO.getCapacity());
-            warehouseEntity.setAddress(warehouseDTO.getAddress());
-            // Saving changes on the database
-            wareHouseRepository.save(warehouseEntity);
-
-            return ResponseEntity.ok("Warehouse updated successfully");
-        } catch (BusinessException e) {
-            return ResponseEntity.badRequest().body("Error updating client: " + e.getMessage());
+            throw new BusinessException("Cannot create warehouse: " + e.getMessage());
         }
     }
 
     @Override
-    public ResponseEntity<WarehouseEntity> findWarehouseById(Long id) {
-        try {
-            Optional<WarehouseEntity> clientOptional = wareHouseRepository.findById(id);
-            if (!clientOptional.isPresent()) {
-                throw new BusinessException("Warehouse with id: " + id + " was not found in the system!");
-            }
-            WarehouseEntity warehouseEntity = clientOptional.get();
-            return ResponseEntity.ok(warehouseEntity);
-        } catch (EmptyResultDataAccessException ex) {
-            throw new BusinessException("Warehouse with id: " + id + " was not found in the system!");
-        }
+    public List<WarehouseResponse> listWarehouses() {
+        return wareHouseRepository.findAll().stream()
+                .map(warehouseMapper::toResponse)
+                .toList();
     }
 
     @Override
-    public ResponseEntity<String> deleteById(Long id) {
-        if (wareHouseRepository.existsById(id)) {
-            wareHouseRepository.deleteById(id);
-            return ResponseEntity.ok("Cliente removido com sucesso");
-        } else {
-            throw new BusinessException("Cliente com número de ID: " + id + " não foi encontrado no sistema");
-        }
+    public WarehouseResponse findWarehouseById(Long id) {
+        WarehouseEntity warehouseEntity = wareHouseRepository.findById(id)
+                .orElseThrow(() -> new BusinessException("Warehouse with id: " + id + " was not found in the system!"));
+        return warehouseMapper.toResponse(warehouseEntity);
     }
 
+    @Override
+    public void updateWarehouseById(Long id, WarehouseRequest warehouseRequest) {
+        WarehouseEntity warehouseEntity = wareHouseRepository.findById(id)
+                .orElseThrow(() -> new BusinessException("Warehouse with id: " + id + " not found in system!"));
+
+        if (StringUtils.hasText(warehouseRequest.getName())) {
+            warehouseEntity.setName(warehouseRequest.getName());
+        }
+        if (warehouseRequest.getCapacity() != null) {
+            warehouseEntity.setCapacity(warehouseRequest.getCapacity());
+        }
+        if (StringUtils.hasText(warehouseRequest.getAddress())) {
+            warehouseEntity.setAddress(warehouseRequest.getAddress());
+        }
+        wareHouseRepository.save(warehouseEntity);
+    }
+
+    @Override
+    public void deleteById(Long id) {
+        WarehouseEntity warehouseEntity = wareHouseRepository.findById(id)
+                .orElseThrow(() -> new BusinessException("Warehouse with ID: " + id + " not found in system!"));
+        wareHouseRepository.delete(warehouseEntity);
+    }
 }

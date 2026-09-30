@@ -3,12 +3,13 @@ package br.com.yoursupplierapp.entity;
 import br.com.yoursupplierapp.utils.CardStatus;
 import lombok.Data;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.List;
 
 @Data
 @Entity
 @Table(name = "users")
+@Inheritance(strategy = InheritanceType.JOINED)
 public class UserEntity {
 
 

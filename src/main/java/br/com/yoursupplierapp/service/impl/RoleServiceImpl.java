@@ -1,96 +1,75 @@
 package br.com.yoursupplierapp.service.impl;
 
-
-import br.com.yoursupplierapp.dto.RoleDTO;
-import br.com.yoursupplierapp.entity.GroupEntity;
+import br.com.yoursupplierapp.api.model.RoleRequest;
+import br.com.yoursupplierapp.api.model.RoleResponse;
 import br.com.yoursupplierapp.entity.RoleEntity;
-import br.com.yoursupplierapp.entity.UserEntity;
 import br.com.yoursupplierapp.exception.BusinessException;
+import br.com.yoursupplierapp.mapper.RoleMapper;
 import br.com.yoursupplierapp.repository.RoleRepository;
 import br.com.yoursupplierapp.service.RoleService;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import javax.validation.constraints.NotBlank;
-import java.util.Optional;
+import java.util.List;
 
 @Service
 public class RoleServiceImpl implements RoleService {
 
     private final RoleRepository roleRepository;
+    private final RoleMapper roleMapper;
 
-    public RoleServiceImpl(RoleRepository roleRepository) {
+    public RoleServiceImpl(RoleRepository roleRepository, RoleMapper roleMapper) {
         this.roleRepository = roleRepository;
+        this.roleMapper = roleMapper;
     }
 
     @Override
-    public void createRole(@NotBlank(message = "O nome da role não pode estar em branco") RoleDTO roleDTO) {
-
-        isExistentRole(roleRepository, roleDTO);
+    public void createRole(RoleRequest roleRequest) {
+        if (!StringUtils.hasText(roleRequest.getRoleName())) {
+            throw new IllegalArgumentException("O nome da role não pode ser nulo ou em branco");
+        }
+        if (roleRepository.findRoleByRoleName(roleRequest.getRoleName()).isPresent()) {
+            throw new BusinessException("Role name: " + roleRequest.getRoleName() + " already registered in the system!");
+        }
 
         try {
-            RoleEntity roleEntity = new RoleEntity();
-            if (StringUtils.hasText(roleDTO.getRoleName())) {
-                roleEntity.setRoleName(roleDTO.getRoleName());
-                roleRepository.save(roleEntity);
-            } else {
-                throw new IllegalArgumentException("O nome da role não pode ser nulo ou em branco");
-            }
-
+            RoleEntity roleEntity = roleMapper.toEntity(roleRequest);
+            roleRepository.save(roleEntity);
         } catch (DataIntegrityViolationException e) {
-            throw new BusinessException("Erro ao criar usuario: " + e.getMessage());
+            throw new BusinessException("Erro ao criar role: " + e.getMessage());
         }
     }
 
     @Override
-        public void isExistentRole(RoleRepository roleRepository, RoleDTO roleDTO) throws BusinessException {
-            if (roleRepository.findRoleByRoleName(roleDTO.getRoleName()).isPresent()) {
-                throw new BusinessException("Role name: " + roleDTO.getRoleName() + " already registered in the system!");
-            }
-        }
-
-    @Override
-    public ResponseEntity<RoleEntity> findRoleById(Long id) {
-        try {
-            Optional<RoleEntity> roleOptional = roleRepository.findById(id);
-            if (!roleOptional.isPresent()) {
-                throw new BusinessException("Role id number: " + id + " not found in system!");
-            }
-            RoleEntity role = roleOptional.get();
-            return ResponseEntity.ok(role);
-        } catch (EmptyResultDataAccessException ex) {
-            throw new BusinessException("Role id number: " + id + " not found in system!");
-        }
+    public List<RoleResponse> listRoles() {
+        return roleRepository.findAll().stream()
+                .map(roleMapper::toResponse)
+                .toList();
     }
 
     @Override
-    public ResponseEntity<String> updateRoleById(RoleDTO roleDTO, Long id) {
-        try {
-            RoleEntity existingRole = roleRepository.findById(id)
-                    .orElseThrow(() -> new BusinessException("Role id number: " + id + " not found in system!"));
-
-            // Update customer fields based on dto data
-            existingRole.setRoleName(roleDTO.getRoleName());
-
-            // Saving changes on the database
-            roleRepository.save(existingRole);
-
-            return ResponseEntity.ok("Role updated successfully");
-        } catch (BusinessException e) {
-            return ResponseEntity.badRequest().body("Error updating role: " + e.getMessage());
-        }
+    public RoleResponse findRoleById(Long id) {
+        RoleEntity role = roleRepository.findById(id)
+                .orElseThrow(() -> new BusinessException("Role id number: " + id + " not found in system!"));
+        return roleMapper.toResponse(role);
     }
 
     @Override
-    public ResponseEntity<String> deleteById(Long id) {
-        if (roleRepository.existsById(id)) {
-            roleRepository.deleteById(id);
-            return ResponseEntity.ok("Role removed successfully");
-        } else {
-            throw new BusinessException("Role with number ID: " + id + " not found in system!");
+    public void updateRoleById(Long id, RoleRequest roleRequest) {
+        RoleEntity existingRole = roleRepository.findById(id)
+                .orElseThrow(() -> new BusinessException("Role id number: " + id + " not found in system!"));
+
+        if (StringUtils.hasText(roleRequest.getRoleName())) {
+            existingRole.setRoleName(roleRequest.getRoleName());
         }
+        roleRepository.save(existingRole);
+    }
+
+    @Override
+    public void deleteById(Long id) {
+        RoleEntity role = roleRepository.findById(id)
+                .orElseThrow(() -> new BusinessException("Role with number ID: " + id + " not found in system!"));
+        roleRepository.delete(role);
     }
 }

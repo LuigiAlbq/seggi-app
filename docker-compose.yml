@@ -1,29 +1,19 @@
-version: "3.7"
+version: "3.8"
 
 services:
 
-  mongo:
-    image: mongo:4.2
-    hostname: mongo
-    container_name: mongo
-    ports:
-      - 27017:27017
-    environment:
-      MONGO_INITDB_DATABASE: bridgewl
-      MONGO_INITDB_ROOT_USERNAME: user
-      MONGO_INITDB_ROOT_PASSWORD: password
-    volumes:
-      - ./scripts/init.js:/docker-entrypoint-initdb.d/init.js:ro
-
-  mysql:
-    image: mysql:5.7
-    hostname: mysql
-    container_name: mysql
+  postgres:
+    image: postgres:16-alpine
+    container_name: seggi-postgres
     restart: always
     ports:
-      - "3306:3306"
+      - "5432:5432"
     environment:
-      MYSQL_DATABASE: bridgewl
-      MYSQL_ROOT_USER: root
-      MYSQL_ROOT_PASSWORD:
-      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+      POSTGRES_DB: seggidb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:

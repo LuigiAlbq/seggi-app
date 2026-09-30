@@ -1,18 +1,19 @@
 package br.com.yoursupplierapp.service;
 
-import br.com.yoursupplierapp.dto.ProductDTO;
-import br.com.yoursupplierapp.dto.UserDTO;
-import br.com.yoursupplierapp.entity.ProductEntity;
-import org.springframework.http.ResponseEntity;
+import br.com.yoursupplierapp.api.model.ProductRequest;
+import br.com.yoursupplierapp.api.model.ProductResponse;
+
+import java.util.List;
 
 public interface ProductService {
 
-    void createProducts(ProductDTO productDTO);
+    void createProducts(ProductRequest productRequest);
 
-    ResponseEntity<ProductEntity> findProductById(Long id);
+    List<ProductResponse> listProducts();
 
-    ResponseEntity<String>  deleteById(Long id);
+    ProductResponse findProductById(Long id);
 
-    ResponseEntity<String> updateProductById(ProductDTO productDTO, Long id);
+    void updateProductById(Long id, ProductRequest productRequest);
 
+    void deleteById(Long id);
 }

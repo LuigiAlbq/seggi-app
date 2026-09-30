@@ -1,20 +1,19 @@
 package br.com.yoursupplierapp.service;
 
-import br.com.yoursupplierapp.dto.UserDTO;
-import br.com.yoursupplierapp.entity.UserEntity;
-import br.com.yoursupplierapp.exception.BusinessException;
-import br.com.yoursupplierapp.repository.UserRepository;
-import org.springframework.http.ResponseEntity;
+import br.com.yoursupplierapp.api.model.UserRequest;
+import br.com.yoursupplierapp.api.model.UserResponse;
+
+import java.util.List;
 
 public interface UserService {
 
-    ResponseEntity<UserEntity> findUserById(Long idUser);
+    UserResponse findUserById(Long idUser);
 
-    void createUser(UserDTO userDTO);
+    List<UserResponse> listUsers();
 
-    void isExistentUser(UserRepository userRepository, UserDTO userDTO) throws BusinessException;
+    void createUser(UserRequest userRequest);
 
-    ResponseEntity<String> updateUserById(UserDTO userDTO, Long id);
+    void updateUserById(Long id, UserRequest userRequest);
 
-    ResponseEntity<String>  deleteById(Long id);
+    void deleteById(Long id);
 }

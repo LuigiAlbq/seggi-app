@@ -1,61 +1,111 @@
+# Seggi App (seggi-app)
 
-#  Microservise Yor Supplier App
+Microsserviço backend Seggi para controle de estoque, gestão de usuários, fornecedores, promotores, produtos e distribuição aos interessados.
 
-API Microservise Yor Supplier App
+---
 
+- **Java 21 LTS** (Eclipse Temurin / OpenJDK)
+- **Spring Boot 4.1.x**
+- **Spring Framework 7**
+- **Jakarta EE 11** (`jakarta.persistence`, `jakarta.validation`)
+- **Spring Data JPA** & **Hibernate 7** (com `ddl-auto=validate`)
+- **Flyway** (via `spring-boot-starter-flyway` — scripts em `src/main/resources/db/migration`)
+- **PostgreSQL 16** (banco de dados relacional principal)
+- **Testcontainers 2.x** (testes de integração com instância real do PostgreSQL 16 em container)
+- **OpenAPI Generator 7.21.0** (com `useSpringBoot4` e `useJackson3` / Jackson 3) — Design de API *Contract-First*
+- **SpringDoc OpenAPI 3.1.x** (Swagger UI)
+- **Spring Boot Actuator** (monitoramento de saúde e integridade com validação do banco)
+- **Lombok**
+- **Apache Maven 3.9+**
+- **Docker & Docker Compose**
 
-## Tecnologias necessárias
+---
 
-- Java 8
-- Spring boot
-- Maven
-- Docker
+## 📋 Pré-requisitos
 
+- **JDK 21 LTS** instalado e configurado no `JAVA_HOME`.
+- **Apache Maven 3.9+** instalado.
+- **Docker** e **Docker Compose** ativos (necessário para subir o banco via Compose ou rodar testes via Testcontainers). Caso utilize uma instalação do PostgreSQL local fora do Docker, crie manualmente o banco de dados `seggidb` na porta `5432` antes de iniciar a aplicação.
 
+---
 
+## 🐳 Inicializando o Banco de Dados (PostgreSQL)
 
-
-## Inicializar docker
-
-Para inicializar docker, seu banco local, abra seu terminal de preferencia e aplique o comando na seguir na raiz do seu projeto \yoursupplierapp.
+Para subir a instância do **PostgreSQL 16** com volume persistente via Docker Compose:
 
 ```bash
-  docker compose up
+docker compose up -d
 ```
 
+> ⚠️ **Atenção:** As credenciais abaixo são exclusivas para desenvolvimento local:
+> - **Host:** `localhost:5432`
+> - **Database:** `seggidb`
+> - **User:** `postgres`
+> - **Password:** `postgres`
+> 
+> Em outros ambientes (staging/produção), configure obrigatoriamente as credenciais através de variáveis de ambiente:  
+> `SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USERNAME`, `SPRING_DATASOURCE_PASSWORD`.
 
-## Explorando Swagger e Endpoints da aplicação.
+---
 
-#### Você pode visualizar todos os endPoints da aplicação no link abaixo.
+## 🛠️ Como Executar o Projeto
 
-```http
-  http://localhost:8080/swagger-ui/index.html
+### 1. Compilação e Geração de Modelos (OpenAPI)
+O projeto adota o padrão **Contract-First**. A especificação OpenAPI está localizada em `src/main/resources/openapi/api-spec.yaml`. Ao compilar, o plugin gera automaticamente os DTOs e contratos de interface em `target/generated-sources/openapi`:
+
+```bash
+mvn clean compile
 ```
 
-```http
-  http://localhost:8080/api-docs
+### 2. Executar os Testes Automatizados
+Os testes de integração utilizam **Testcontainers** (PostgreSQL 16 real em container). É necessário ter o Docker em execução:
+
+```bash
+mvn clean verify
 ```
 
-#### Você ver se a aplicação está de pé usando Health Checker.
+> ℹ️ **Nota:** A primeira execução baixa a imagem Docker `postgres:16-alpine` e por isso pode demorar um pouco mais.
 
-```http
-  http://localhost:8080/api-yoursupplierapp/health-check
+### 3. Executar a Aplicação Localmente
+Com o banco PostgreSQL ativo:
+
+```bash
+mvn spring-boot:run
 ```
 
+A aplicação estará disponível em `http://localhost:8080`. Na inicialização, o **Flyway** executa automaticamente as migrações presentes em `src/main/resources/db/migration/` e o Hibernate valida o schema das entidades (`ddl-auto=validate`).
 
+---
 
+## 📖 Documentação, Monitoramento e Swagger UI
 
+Com a aplicação em execução, acesse os endpoints disponíveis:
 
+- **Swagger UI (Documentação Interativa):**  
+  [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html)
 
+- **Especificação OpenAPI JSON:**  
+  [http://localhost:8080/api-docs](http://localhost:8080/api-docs) *(ou o padrão `/v3/api-docs`)*
 
+- **Health Check da Aplicação (Actuator):**  
+  [http://localhost:8080/actuator/health](http://localhost:8080/actuator/health)  
+  *(Valida o status do microsserviço e a conectividade com o banco PostgreSQL — `db: UP`)*
 
+---
 
+## ⚙️ Manutenção de Ambiente (Windows)
 
+Caso você possua instalações legadas de JDKs corporativos com certificados SSL antigos no Windows, execute como Administrador o script auxiliar de limpeza:
 
-## Código de conduta
+```powershell
+& ".\scripts\clean-system-jdk.ps1"
+```
 
-Contribuições são sempre bem-vindas!
+---
 
-- Atente a boas práticas de programação.
+## 🤝 Contribuição e Boas Práticas
 
-
+1. Mantenha o padrão de código e as anotações do Jakarta EE (`jakarta.*`).
+2. Qualquer novo contrato de API deve ser versionado no arquivo `src/main/resources/openapi/api-spec.yaml`.
+3. Garanta que `mvn clean verify` passe (build + testes com Testcontainers) antes de abrir Pull Requests.
+4. Qualquer alteração estrutural no banco de dados deve ser realizada via script versionado no Flyway (`V{X}__{descricao}.sql` em `src/main/resources/db/migration`).
