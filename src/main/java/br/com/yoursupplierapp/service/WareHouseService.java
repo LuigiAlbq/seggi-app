@@ -1,20 +1,19 @@
 package br.com.yoursupplierapp.service;
 
-import br.com.yoursupplierapp.dto.WarehouseDTO;
-import br.com.yoursupplierapp.entity.WarehouseEntity;
-import org.springframework.http.ResponseEntity;
+import br.com.yoursupplierapp.api.model.WarehouseRequest;
+import br.com.yoursupplierapp.api.model.WarehouseResponse;
+
+import java.util.List;
 
 public interface WareHouseService {
 
-    void createWareHouse(WarehouseDTO warehouseDTO);
+    void createWareHouse(WarehouseRequest warehouseRequest);
 
-    ResponseEntity<WarehouseEntity> findWarehouseById(Long id);
+    List<WarehouseResponse> listWarehouses();
 
-    ResponseEntity<String> updateWarehouseById(WarehouseDTO warehouseDTO, Long id);
+    WarehouseResponse findWarehouseById(Long id);
 
-    ResponseEntity<String>  deleteById(Long id);
+    void updateWarehouseById(Long id, WarehouseRequest warehouseRequest);
 
-//    ResponseEntity<WarehouseEntity> findProductByName(ProductEntity products);
-
-
+    void deleteById(Long id);
 }

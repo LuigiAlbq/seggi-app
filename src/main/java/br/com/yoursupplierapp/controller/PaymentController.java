@@ -1,78 +1,66 @@
 package br.com.yoursupplierapp.controller;
 
-import br.com.yoursupplierapp.dto.PaymentDTO;
-import br.com.yoursupplierapp.dto.UserDTO;
-import br.com.yoursupplierapp.entity.PaymentEntity;
-import br.com.yoursupplierapp.entity.UserEntity;
+import br.com.yoursupplierapp.api.PaymentApi;
+import br.com.yoursupplierapp.api.model.PaymentRequest;
+import br.com.yoursupplierapp.api.model.PaymentResponse;
 import br.com.yoursupplierapp.exception.BusinessException;
-import br.com.yoursupplierapp.repository.PaymentRepository;
 import br.com.yoursupplierapp.service.PaymentService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/payment")
-public class PaymentController {
+public class PaymentController implements PaymentApi {
 
     private final PaymentService paymentService;
 
-    private final PaymentRepository paymentRepository;
-
-
-    public PaymentController(PaymentService paymentService, PaymentRepository paymentRepository) {
+    public PaymentController(PaymentService paymentService) {
         this.paymentService = paymentService;
-        this.paymentRepository = paymentRepository;
     }
 
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<String> save(
-            @RequestBody PaymentDTO paymentDTO) {
+    @Override
+    public ResponseEntity<String> createPayment(PaymentRequest paymentRequest) {
         try {
-            paymentService.createPayment(paymentDTO);
-            return ResponseEntity.ok("payment created with success");
+            paymentService.createPayment(paymentRequest);
+            return ResponseEntity.status(HttpStatus.CREATED).body("payment created with success");
         } catch (BusinessException e) {
             return ResponseEntity.badRequest().body("Error creating payment: " + e.getMessage());
         }
     }
 
-    @GetMapping
-    public ResponseEntity<List<PaymentEntity>> list() {
-        List<PaymentEntity> payment = paymentRepository.findAll();
-        return ResponseEntity.ok(payment);
+    @Override
+    public ResponseEntity<List<PaymentResponse>> listPayments() {
+        return ResponseEntity.ok(paymentService.listPayments());
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<?> findById(
-            @PathVariable Long id) {
+    @Override
+    public ResponseEntity<PaymentResponse> getPaymentById(Long id) {
         try {
-            return paymentService.findPaymentById(id);
-            //return ResponseEntity.ok(clientService.findUserById(id)); -> Displays headers, body, status code...
+            return ResponseEntity.ok(paymentService.findPaymentById(id));
         } catch (BusinessException e) {
-            return ResponseEntity.badRequest().body("Error finding client: " + e.getMessage());
-        }
-
-    }
-
-    @PutMapping("/{id}")
-    @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<String> update(
-            @RequestBody PaymentDTO paymentDTO,
-            @PathVariable("id") Long id) {
-        return paymentService.updatePayment(paymentDTO, id);
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteById(
-            @PathVariable("id") Long id) {
-        try {
-            return paymentService.deleteById(id);
-        } catch (BusinessException e) {
-            return ResponseEntity.badRequest().body("Error deleting client: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
 
+    @Override
+    public ResponseEntity<String> updatePaymentById(Long id, PaymentRequest paymentRequest) {
+        try {
+            paymentService.updatePayment(id, paymentRequest);
+            return ResponseEntity.ok("payment updated successfully");
+        } catch (BusinessException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Error updating payment: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public ResponseEntity<String> deletePaymentById(Long id) {
+        try {
+            paymentService.deleteById(id);
+            return ResponseEntity.ok("payment removed successfully");
+        } catch (BusinessException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Error deleting payment: " + e.getMessage());
+        }
+    }
 }

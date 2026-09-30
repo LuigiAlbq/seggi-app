@@ -3,7 +3,7 @@ package br.com.yoursupplierapp.entity;
 import br.com.yoursupplierapp.utils.PaymentConstant;
 import lombok.Data;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 @Data
 @Entity
@@ -26,8 +26,8 @@ public class PaymentEntity {
     @Column(name = "expiration_date") // Especificar o nome da coluna
     private String expirationDate;
 
-    @Column(name = "value")
-    private Double paymentValue; // Use um nome mais significativo, como paymentValue
+    @Column(name = "payment_value")
+    private Double paymentValue;
 
     @OneToOne
     @JoinColumn(name = "id_order")

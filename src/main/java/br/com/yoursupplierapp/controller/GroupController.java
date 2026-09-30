@@ -1,34 +1,29 @@
 package br.com.yoursupplierapp.controller;
 
-import br.com.yoursupplierapp.dto.GroupDto;
+import br.com.yoursupplierapp.api.GroupApi;
+import br.com.yoursupplierapp.api.model.GroupRequest;
 import br.com.yoursupplierapp.exception.BusinessException;
-import br.com.yoursupplierapp.repository.GroupRepository;
 import br.com.yoursupplierapp.service.GroupService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/group")
-public class GroupController {
+public class GroupController implements GroupApi {
 
     private final GroupService groupService;
 
-    private final GroupRepository groupRepository;
-
-    public GroupController(GroupService groupService, GroupRepository groupRepository) {
+    public GroupController(GroupService groupService) {
         this.groupService = groupService;
-        this.groupRepository = groupRepository;
     }
 
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<String> save(@RequestBody GroupDto groupDto) {
+    @Override
+    public ResponseEntity<Void> createGroup(GroupRequest groupRequest) {
         try {
-            groupService.createGroup(groupDto);
-            return ResponseEntity.ok("Role created successfully");
+            groupService.createGroup(groupRequest);
+            return ResponseEntity.status(HttpStatus.CREATED).build();
         } catch (BusinessException e) {
-            return ResponseEntity.badRequest().body("Error to create role: " + e.getMessage());
+            return ResponseEntity.badRequest().build();
         }
     }
 }

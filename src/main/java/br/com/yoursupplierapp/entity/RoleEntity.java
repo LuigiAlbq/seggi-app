@@ -2,9 +2,7 @@ package br.com.yoursupplierapp.entity;
 
 import lombok.Data;
 
-import javax.persistence.*;
-import javax.validation.constraints.NotNull;
-import java.util.List;
+import jakarta.persistence.*;
 
 @Data
 @Entity
