@@ -93,16 +93,6 @@ Com a aplicação em execução, acesse os endpoints disponíveis:
 
 ---
 
-## ⚙️ Manutenção de Ambiente (Windows)
-
-Caso você possua instalações legadas de JDKs corporativos com certificados SSL antigos no Windows, execute como Administrador o script auxiliar de limpeza:
-
-```powershell
-& ".\scripts\clean-system-jdk.ps1"
-```
-
----
-
 ## 🤝 Contribuição e Boas Práticas
 
 1. Mantenha o padrão de código e as anotações do Jakarta EE (`jakarta.*`).
